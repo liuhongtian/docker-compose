@@ -93,7 +93,7 @@ services:
       - ./volumes/zookeeper/2/logs:/logs
     environment:
       ZOO_MY_ID: 2
-      ZOO_SERVERS: server.1=zk1.hcloud.com:2888:3888;2181 server.2=0.0.0.0:2888:3888;2181 server.3=h-zk3.hcloud.com:2888:3888;2181
+      ZOO_SERVERS: server.1=zk1.hcloud.com:2888:3888;2181 server.2=0.0.0.0:2888:3888;2181 server.3=zk3.hcloud.com:2888:3888;2181
 
   h-zookeeper-3:
     image: zookeeper:3.6
