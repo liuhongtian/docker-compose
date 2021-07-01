@@ -1,0 +1,1 @@
+docker run -p 31883:1883 -p 31083:18083 -e EMQX_NAME=emqx -e EMQX_HOST=emqx.hcloud.com -v ./volumes/emqx/data:/opt/emqx/data -v ./volumes/emqx/etc:/opt/emqx/etc -v ./volumes/emqx/log:/opt/emqx/log emqx/emqx:4.3.5

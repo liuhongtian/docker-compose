@@ -1,7 +1,6 @@
 version: "3.9"
 
 services:
-
   h-ubuntu-console:
     image: ubuntu:focal
     hostname: ubuntu.hcloud.com
@@ -67,6 +66,53 @@ services:
     deploy:
       replicas: 1
 
+  h-emqx:
+    image: emqx/emqx:4.3.5
+    hostname: emqx.hcloud.com
+    ports:
+      - "31883:1883"
+      - "31083:18083"
+    env_file:
+      - ./emqx.env
+    volumes:
+      - ./volumes/emqx/data:/opt/emqx/data
+      - ./volumes/emqx/etc:/opt/emqx/etc
+      - ./volumes/emqx/log:/opt/emqx/log
+    deploy:
+      replicas: 1
+
+  h-emqx-c1:
+    image: emqx/emqx:4.3.5
+    hostname: emqx-c1.hcloud.com
+    #ports:
+    #  - "31981:1883"
+    #  - "31981:18083"
+    environment:
+      - "EMQX_NAME=emqx"
+      - "EMQX_HOST=emqx-c1.hcloud.com"
+      - "EMQX_CLUSTER__DISCOVERY=static"
+      - "EMQX_CLUSTER__STATIC__SEEDS=emqx@emqx-c1.hcloud.com, emqx@emqx-c2.hcloud.com"
+    volumes:
+      - ./volumes/emqx-c1/data:/opt/emqx/data
+      - ./volumes/emqx-c1/etc:/opt/emqx/etc
+      - ./volumes/emqx-c1/log:/opt/emqx/log
+
+  h-emqx-c2:
+    image: emqx/emqx:4.3.5
+    hostname: emqx-c2.hcloud.com
+    #ports:
+    #  - "31982:1883"
+    #  - "31982:18083"
+    environment:
+      - "EMQX_NAME=emqx"
+      - "EMQX_HOST=emqx-c2.hcloud.com"
+      - "EMQX_CLUSTER__DISCOVERY=static"
+      - "EMQX_CLUSTER__STATIC__SEEDS=emqx-c1.hcloud.com, emqx@emqx-c2.hcloud.com"
+    volumes:
+      - ./volumes/emqx-c2/data:/opt/emqx/data
+      - ./volumes/emqx-c2/etc:/opt/emqx/etc
+      - ./volumes/emqx-c2/log:/opt/emqx/log
+
   h-zookeeper-1:
     image: zookeeper:3.6
     hostname: zk1.hcloud.com
@@ -131,7 +177,25 @@ services:
     depends_on:
       - h-kafka-zookeeper
 
-#volumes:
+  h-mongo:
+    image: mongo:4.4.6-bionic
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - ./volumes/mongo/data/db:/data/db
+    env_file:
+      - ./mongo.env
+
+  h-mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 28081:8081
+    env_file:
+      - ./mongo-express.env
+
+      #volumes:
 #  db-data:
 
 #networks:
