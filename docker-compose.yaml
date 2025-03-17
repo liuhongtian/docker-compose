@@ -1,22 +1,20 @@
-version: "3.9"
-
 services:
-  h-ubuntu-console:
-    image: ubuntu:focal
+  ubuntu-console:
+    image: ubuntu:noble
     hostname: ubuntu.hcloud.com
     command: ["/usr/bin/tail", "-f", "/dev/null"]
     deploy:
       replicas: 1
 
-  h-debian-console:
+  debian-console:
     build: ./images/debian
     hostname: debian.hcloud.com
     command: ["/usr/bin/tail", "-f", "/dev/null"]
     deploy:
       replicas: 1
 
-  h-nginx:
-    image: nginx:1.19.6
+  nginx:
+    image: nginx
     hostname: nginx.hcloud.com
     ports:
       - "80:80"
@@ -28,11 +26,12 @@ services:
     deploy:
       replicas: 1
 
-  h-redis:
-    image: redis:6
+  redis:
+    image: redis
     hostname: redis.hcloud.com
     ports:
       - "6379:6379"
+    restart: always
     volumes:
       - ./volumes/redis/data:/data
       - ./volumes/redis/logs:/logs
@@ -40,19 +39,32 @@ services:
     deploy:
       replicas: 1
 
-  h-mariadb:
-    image: mariadb:10
-    hostname: mariadb.hcloud.com
+  #  h-mariadb:
+  #    image: mariadb:10
+  #    hostname: mariadb.hcloud.com
+  #    ports:
+  #      - "3306:3306"
+  #    env_file:
+  #      - ./mariadb.env
+  #    volumes:
+  #      - ./volumes/mariadb:/var/lib/mysql
+  #    deploy:
+  #      replicas: 1
+
+  mysql:
+    image: mysql
     ports:
       - "3306:3306"
-    env_file:
-      - ./mariadb.env
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ry
+      MYSQL_USER: ruoyi
+      MYSQL_PASSWORD: ruoyi123456
     volumes:
-      - ./volumes/mariadb:/var/lib/mysql
-    deploy:
-      replicas: 1
+      - ./volumes/mysql:/var/lib/mysql
 
-  h-rabbitmq:
+  rabbitmq:
     image: rabbitmq:3-management
     hostname: rabbitmq.hcloud.com
     ports:
@@ -66,7 +78,7 @@ services:
     deploy:
       replicas: 1
 
-  h-emqx:
+  emqx:
     image: emqx/emqx:4.3.5
     hostname: emqx.hcloud.com
     ports:
@@ -81,7 +93,7 @@ services:
     deploy:
       replicas: 1
 
-  h-mosquitto:
+  mosquitto:
     image: eclipse-mosquitto
     hostname: mosquitto.hcloud.com
     ports:
@@ -97,7 +109,7 @@ services:
     deploy:
       replicas: 1
 
-  h-emqx-c1:
+  emqx-c1:
     image: emqx/emqx:4.3.5
     hostname: emqx-c1.hcloud.com
     #ports:
@@ -113,7 +125,7 @@ services:
       - ./volumes/emqx-c1/etc:/opt/emqx/etc
       - ./volumes/emqx-c1/log:/opt/emqx/log
 
-  h-emqx-c2:
+  emqx-c2:
     image: emqx/emqx:4.3.5
     hostname: emqx-c2.hcloud.com
     #ports:
@@ -129,7 +141,7 @@ services:
       - ./volumes/emqx-c2/etc:/opt/emqx/etc
       - ./volumes/emqx-c2/log:/opt/emqx/log
 
-  h-zookeeper-1:
+  zookeeper-1:
     image: zookeeper:3.6
     hostname: zk1.hcloud.com
     restart: always
@@ -143,7 +155,7 @@ services:
       ZOO_MY_ID: 1
       ZOO_SERVERS: server.1=0.0.0.0:2888:3888;2181 server.2=zk2.hcloud.com:2888:3888;2181 server.3=zk3.hcloud.com:2888:3888;2181
 
-  h-zookeeper-2:
+  zookeeper-2:
     image: zookeeper:3.6
     hostname: zk2.hcloud.com
     restart: always
@@ -157,7 +169,7 @@ services:
       ZOO_MY_ID: 2
       ZOO_SERVERS: server.1=zk1.hcloud.com:2888:3888;2181 server.2=0.0.0.0:2888:3888;2181 server.3=zk3.hcloud.com:2888:3888;2181
 
-  h-zookeeper-3:
+  zookeeper-3:
     image: zookeeper:3.6
     hostname: zk3.hcloud.com
     restart: always
@@ -171,7 +183,7 @@ services:
       ZOO_MY_ID: 3
       ZOO_SERVERS: server.1=zk1.hcloud.com:2888:3888;2181 server.2=zk2.hcloud.com:2888:3888;2181 server.3=0.0.0.0:2888:3888;2181
 
-  h-kafka-zookeeper:
+  kafka-zookeeper:
     image: docker.io/bitnami/zookeeper:3-debian-10
     hostname: kafka-zk.hcloud.com
     ports:
@@ -180,7 +192,7 @@ services:
       - ./volumes/kafka/zookeeper_data:/bitnami
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
-  h-kafka:
+  kafka:
     image: docker.io/bitnami/kafka:2-debian-10
     hostname: kafka.hcloud.com
     ports:
@@ -193,7 +205,7 @@ services:
     depends_on:
       - h-kafka-zookeeper
 
-  h-mongo:
+  mongo:
     image: mongo:4.4.6-bionic
     restart: always
     ports:
@@ -203,17 +215,15 @@ services:
     env_file:
       - ./mongo.env
 
-  h-mongo-express:
+  mongo-express:
     image: mongo-express
     restart: always
     ports:
       - 28081:8081
     env_file:
       - ./mongo-express.env
-
-      #volumes:
+#volumes:
 #  db-data:
 
 #networks:
 #  overlay:
-
